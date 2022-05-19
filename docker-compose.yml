@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  server:
+    build:
+      context: ./server/
+    container_name: server
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:${APP_PATCH}
+      - ./server/config/apache2.conf:/etc/apache2/apache2.conf
+      - ./server/config/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes: 
+      - ./postgres/data/:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+#  xdebug:
+#    build:
+#      context: ./xdebug/
+#    container_name: xdebug
+#    volumes:
+#      - ./app:/app
+#    ports:
+#      - 9003:9000
+#    hostname: xdebug
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+#  mailhog:
+#    image: mailhog/mailhog:latest
+#    restart: always
+#    ports:
+#      - 1025:1025
+#      - 8025:8025
